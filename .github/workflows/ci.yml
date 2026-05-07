@@ -28,17 +28,17 @@ jobs:
       - name: Run backend tests
         working-directory: server
         env:
-          NODE_ENV: test
-          JWT_SECRET: test-secret-1234567890-test-secret
-          JWT_EXPIRES_IN: 1d
-          ADMIN_EMAIL: admin@system.com
-          ADMIN_PASSWORD: admin123secure
-          CLIENT_URL: http://localhost:3000
-          AI_API_URL: http://127.0.0.1:5001
-          ETH_RPC_URL: http://127.0.0.1:8545
-          ETH_PRIVATE_KEY: 0x1111111111111111111111111111111111111111111111111111111111111111
-          ETH_CONTRACT_ADDRESS: 0x1111111111111111111111111111111111111111
-          STORAGE_PROVIDER: local
+          NODE_ENV: "test"
+          JWT_SECRET: "test-secret-1234567890-test-secret"
+          JWT_EXPIRES_IN: "1d"
+          ADMIN_EMAIL: "admin@system.com"
+          ADMIN_PASSWORD: "admin123secure"
+          CLIENT_URL: "http://localhost:3000"
+          AI_API_URL: "http://127.0.0.1:5001"
+          ETH_RPC_URL: "http://127.0.0.1:8545"
+          ETH_PRIVATE_KEY: "0x1111111111111111111111111111111111111111111111111111111111111111"
+          ETH_CONTRACT_ADDRESS: "0x1111111111111111111111111111111111111111"
+          STORAGE_PROVIDER: "local"
         run: npm test
 
   frontend-build:
@@ -63,8 +63,8 @@ jobs:
       - name: Build frontend
         working-directory: client
         env:
-          VITE_API_BASE_URL: http://localhost:5000/api
-          VITE_SOCKET_URL: http://localhost:5000
+          VITE_API_BASE_URL: "http://localhost:5000/api"
+          VITE_SOCKET_URL: "http://localhost:5000"
         run: npm run build
 
   ai-module-check:
