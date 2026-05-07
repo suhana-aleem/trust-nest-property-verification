@@ -1,0 +1,30 @@
+# Node
+node_modules/
+client/node_modules/
+server/node_modules/
+smart-contract/node_modules/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Build output
+client/dist/
+smart-contract/cache/
+smart-contract/artifacts/
+
+# Environment files
+.env
+server/.env
+client/.env
+ai-module/.env
+smart-contract/.env
+
+# Uploads and runtime data
+server/uploads/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

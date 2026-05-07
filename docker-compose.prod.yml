@@ -1,0 +1,29 @@
+services:
+  server:
+    build:
+      context: ./server
+    env_file:
+      - ./server/.env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - ai-module
+    restart: unless-stopped
+
+  ai-module:
+    build:
+      context: ./ai-module
+    env_file:
+      - ./ai-module/.env
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    restart: unless-stopped

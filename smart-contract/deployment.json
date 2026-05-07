@@ -1,0 +1,5 @@
+{
+  "network": "sepolia",
+  "contract": "DocumentHashRegistry",
+  "address": "0x014F351c159cF40337ad50eD322D159A89c22B6A"
+}
