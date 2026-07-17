@@ -11,6 +11,7 @@ loadEnv();
 process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = "test-secret-1234567890-test-secret";
 process.env.JWT_EXPIRES_IN = "1d";
+process.env.REFRESH_TOKEN_TTL_MS = "604800000";
 process.env.ADMIN_EMAIL = "admin@system.com";
 process.env.ADMIN_PASSWORD = "admin123secure";
 process.env.CLIENT_URL = "http://localhost:3000";

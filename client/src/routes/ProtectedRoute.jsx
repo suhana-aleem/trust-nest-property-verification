@@ -6,7 +6,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (loading) return <p className="page-msg">Loading session...</p>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user?.role)) {
-    const fallback = ["Admin", "LegalOfficer", "Registrar"].includes(user?.role)
+    const fallback = ["Admin", "Registrar"].includes(user?.role)
       ? "/admin/dashboard"
       : "/dashboard";
     return <Navigate to={fallback} replace />;

@@ -5,11 +5,16 @@ This folder contains the Node.js + Express API for document verification, approv
 ## 1. Features Covered
 
 - JWT authentication (`register`, `login`, `me`)
-- Role-based authorization (`Admin`, `LegalOfficer`, `Buyer`, `Seller`, `Registrar`)
+- Refresh token rotation (`refresh`, `logout`)
+- Role-based authorization (`Admin`, `Buyer`, `Seller`, `Registrar`)
 - Secure document upload (PDF/JPG/PNG) with metadata in MongoDB
+- Authenticated inline file preview for supported PDF/image uploads
 - Document lifecycle states:
   - `Uploaded`
   - `AI Verified`
+  - `Admin Approved`
+  - `Corrections Requested`
+  - `Admin Rejected`
   - `Blockchain Registered`
   - `Locked`
 - Real-time collaborative editing using Socket.io with simple OT
@@ -66,6 +71,7 @@ cp .env.example .env
 3. Update `.env` values:
 - `MONGODB_URI` (MongoDB Atlas connection string)
 - `JWT_SECRET`
+- `REFRESH_TOKEN_TTL_MS`
 - `AI_API_URL` (Flask service URL)
 - `ETH_RPC_URL`, `ETH_PRIVATE_KEY`, `ETH_CONTRACT_ADDRESS`
 - `STORAGE_PROVIDER` (`local` by default)
@@ -94,6 +100,7 @@ npm test
 
 Current coverage focus:
 - authentication flows
+- refresh token rotation and logout
 - role restrictions
 - guarded document workflow from upload through lock
 
@@ -117,12 +124,16 @@ docker run --env-file .env -p 5000:5000 trust-nest-server
 - `POST /api/auth/login`
 - `POST /api/auth/admin/login`
 - `POST /api/auth/admin/invite-register`
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
 - `GET /api/auth/me`
 
 ### Documents
 - `POST /api/documents/upload` (multipart field: `document`)
+- `GET /api/documents/originals`
 - `GET /api/documents`
 - `GET /api/documents/:id`
+- `GET /api/documents/:id/file`
 - `POST /api/documents/:id/participants`
 - `GET /api/documents/:id/versions`
 - `POST /api/documents/:id/analyze-ai`
@@ -131,6 +142,9 @@ docker run --env-file .env -p 5000:5000 trust-nest-server
 - `GET /api/documents/:id/verify-blockchain`
 - `POST /api/documents/:id/lock`
 - `POST /api/documents/:id/issue-certificate`
+- `POST /api/verify-document`
+- `GET /api/verification-report/:id`
+- `GET /api/verification-report/document/:id/latest`
 
 ### Audit
 - `GET /api/audit-logs`
@@ -171,8 +185,8 @@ or
 
 ## 9. Notes for Academic Demo
 
-- Keep one `Seller` as document uploader.
-- Add `Buyer` / `LegalOfficer` as participants.
-- Perform live edits from two clients to demonstrate collaboration.
-- Run AI verification, then blockchain registration, then lock document.
+- Keep one `Registrar` as the original-document uploader and one `Buyer` or `Seller` as the copy uploader.
+- Add `Buyer` as a participant for shared review if needed.
+- Perform live edits from two back-office clients only if you want to demonstrate official agreement drafting.
+- Run verification, Admin decision, then blockchain registration, then lock document.
 - Use audit logs to explain traceability and tamper resistance.

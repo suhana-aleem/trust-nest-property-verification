@@ -112,6 +112,9 @@ textarea {
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 999px;
   padding: 0.72rem 1.1rem;
@@ -131,6 +134,10 @@ textarea {
   opacity: 0.6;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.btn-link {
+  text-decoration: none;
 }
 
 .btn-danger {
@@ -260,6 +267,24 @@ textarea {
   font-size: 0.88rem;
 }
 
+.role-guide {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.2rem;
+}
+
+.role-guide span {
+  padding: 0.58rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(24, 36, 61, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--ink);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
 .auth-card {
   width: 100%;
   max-width: 470px;
@@ -307,6 +332,30 @@ textarea:focus {
     radial-gradient(circle at top right, rgba(211, 155, 59, 0.2), transparent 20rem);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+}
+
+.verdict-legend {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.verdict-card {
+  min-height: 0;
+}
+
+.verdict-card p,
+.summary-note,
+.detail-verdict-note {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.detail-verdict-note {
+  max-width: 26rem;
 }
 
 .hero-title {
@@ -393,6 +442,193 @@ textarea:focus {
   line-height: 1;
 }
 
+.upload-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.upload-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.upload-role-badge {
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: rgba(176, 74, 47, 0.1);
+  color: var(--accent-strong);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(176, 74, 47, 0.16);
+}
+
+.upload-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.upload-steps span {
+  padding: 0.6rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(24, 36, 61, 0.08);
+  color: var(--ink);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.86rem;
+}
+
+.upload-note {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.upload-highlight {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(24, 36, 61, 0.08);
+}
+
+.upload-highlight-item {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.upload-highlight-item p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.upload-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.35rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+  flex: 0 0 auto;
+}
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.field-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field-card span {
+  color: var(--muted);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.field-card input {
+  margin: 0;
+}
+
+.field-wide {
+  width: 100%;
+}
+
+.file-drop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px dashed rgba(176, 74, 47, 0.24);
+}
+
+.file-label {
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  color: var(--accent-strong);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.file-copy {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.file-controls {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: end;
+  min-width: min(100%, 320px);
+}
+
+.file-input {
+  margin: 0;
+  padding: 0.75rem;
+}
+
+.file-name-chip {
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(176, 74, 47, 0.08);
+  color: var(--accent-strong);
+  font-size: 0.86rem;
+}
+
+.upload-tip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.upload-tip-card {
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(24, 36, 61, 0.08);
+}
+
+.upload-tip-card span {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  color: var(--accent-strong);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.upload-tip-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.upload-submit {
+  width: fit-content;
+}
+
 .table {
   width: 100%;
   border-collapse: separate;
@@ -419,6 +655,22 @@ textarea:focus {
 .table-actions {
   display: flex;
   gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.text-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.danger-text {
+  color: var(--danger);
 }
 
 .suggestion-form,
@@ -547,6 +799,14 @@ textarea:focus {
   font-size: 1.2rem;
 }
 
+.reference-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(24, 36, 61, 0.08);
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -572,6 +832,11 @@ textarea:focus {
   color: #955f17;
 }
 
+.badge-red {
+  background: #f9d6d9;
+  color: #9f1d29;
+}
+
 .badge-green {
   background: #d7f0e2;
   color: #0b6e4f;
@@ -582,6 +847,29 @@ textarea:focus {
   gap: 0.65rem;
   flex-wrap: wrap;
   margin: 1rem 0 0.8rem;
+}
+
+.action-stack {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.action-group {
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(24, 36, 61, 0.08);
+}
+
+.action-group-title {
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: "Segoe UI", Tahoma, sans-serif;
 }
 
 .code {
@@ -642,10 +930,103 @@ textarea:focus {
   font-size: 0.86rem;
 }
 
+.preview-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.document-preview-frame {
+  min-height: 420px;
+  border-radius: 26px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.document-preview-image,
+.document-preview-pdf {
+  display: block;
+  width: 100%;
+  min-height: 420px;
+  border: 0;
+  background: #fff;
+}
+
+.inspection-sidebar {
+  display: grid;
+  gap: 1rem;
+}
+
+.inspection-card,
+.risk-visual-card,
+.suspicious-card {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 1rem 1.1rem;
+}
+
+.inspection-label,
+.suspicious-index {
+  display: inline-block;
+  margin-bottom: 0.45rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.risk-visualization,
+.suspicious-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.risk-meter {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+  margin: 0.65rem 0 0.85rem;
+}
+
+.risk-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #d97706 0%, #dc2626 100%);
+}
+
+.tamper-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.tamper-pill {
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(185, 28, 28, 0.08);
+  color: #991b1b;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 0.88rem;
+}
+
 @media (max-width: 980px) {
   .auth-shell,
   .hero-panel,
   .editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-layout,
+  .risk-visualization,
+  .suspicious-grid {
     grid-template-columns: 1fr;
   }
 
@@ -712,4 +1093,104 @@ textarea:focus {
   .hero-tagline {
     font-size: 0.82rem;
   }
+}
+.table-action-separator {
+  color: var(--muted);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.destructive-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.text-btn:disabled,
+.destructive-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.table tr {
+  transition: opacity 180ms ease, transform 180ms ease, background-color 180ms ease;
+}
+
+.table tr.is-removing {
+  opacity: 0.28;
+  transform: translateX(8px);
+  background: rgba(249, 211, 216, 0.28);
+  pointer-events: none;
+}
+
+.table-empty {
+  padding: 1.4rem 0.8rem;
+  color: var(--muted);
+  text-align: center;
+  font-style: italic;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(6px);
+}
+
+.modal-card {
+  width: min(100%, 520px);
+  padding: 1.45rem;
+  border-radius: 26px;
+  background: var(--surface-strong);
+  border: 1px solid rgba(24, 36, 61, 0.12);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+}
+
+.modal-card h3 {
+  margin-bottom: 0.55rem;
+}
+
+.modal-message {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.toast {
+  position: fixed;
+  right: 1.2rem;
+  bottom: 1.2rem;
+  z-index: 85;
+  min-width: min(100%, 340px);
+  max-width: 420px;
+  padding: 0.95rem 1.1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(24, 36, 61, 0.12);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  line-height: 1.45;
+}
+
+.toast-success {
+  color: #0b6e4f;
+  background: rgba(215, 240, 226, 0.96);
+}
+
+.toast-error {
+  color: #9f1d29;
+  background: rgba(249, 214, 217, 0.96);
 }

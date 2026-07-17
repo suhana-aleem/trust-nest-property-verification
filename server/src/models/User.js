@@ -11,7 +11,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(USER_ROLES),
       default: USER_ROLES.BUYER
-    }
+    },
+    isBlocked: { type: Boolean, default: false },
+    blockedAt: { type: Date, default: null },
+    blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    blockReason: { type: String, default: "" }
   },
   { timestamps: true }
 );

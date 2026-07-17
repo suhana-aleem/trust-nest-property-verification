@@ -23,7 +23,7 @@ def _pdf_first_page_to_bgr(file_bytes: bytes) -> np.ndarray:
             raise ValueError("Uploaded PDF has no pages")
 
         page = pdf[0]
-        pil_img = page.render(scale=2).to_pil()
+        pil_img = page.render(scale=1.3).to_pil()
         rgb_img = np.array(pil_img.convert("RGB"))
         bgr_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2BGR)
         return bgr_img

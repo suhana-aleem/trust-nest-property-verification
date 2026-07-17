@@ -13,6 +13,7 @@ describe("Authentication API", () => {
 
     expect(response.statusCode).toBe(201);
     expect(response.body.token).toBeTruthy();
+    expect(response.body.refreshToken).toBeTruthy();
     expect(response.body.user.role).toBe(USER_ROLES.SELLER);
   });
 
@@ -61,5 +62,35 @@ describe("Authentication API", () => {
     expect(createInvite.statusCode).toBe(201);
     expect(createInvite.body.invite.code).toMatch(/^INV-/);
     expect(createInvite.body.invite.role).toBe(USER_ROLES.REGISTRAR);
+  });
+
+  test("rotates refresh tokens and supports logout", async () => {
+    const registered = await request(app).post("/api/auth/register").send({
+      name: "Seller Two",
+      email: "seller2@example.com",
+      password: "Password1",
+      role: USER_ROLES.SELLER
+    });
+
+    const refresh = await request(app).post("/api/auth/refresh").send({
+      refreshToken: registered.body.refreshToken
+    });
+
+    expect(refresh.statusCode).toBe(200);
+    expect(refresh.body.token).toBeTruthy();
+    expect(refresh.body.refreshToken).toBeTruthy();
+    expect(refresh.body.refreshToken).not.toBe(registered.body.refreshToken);
+
+    const logout = await request(app).post("/api/auth/logout").send({
+      refreshToken: refresh.body.refreshToken
+    });
+
+    expect(logout.statusCode).toBe(200);
+
+    const refreshAfterLogout = await request(app).post("/api/auth/refresh").send({
+      refreshToken: refresh.body.refreshToken
+    });
+
+    expect(refreshAfterLogout.statusCode).toBe(401);
   });
 });

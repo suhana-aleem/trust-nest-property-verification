@@ -5,21 +5,38 @@ const InviteCode = require("../models/InviteCode");
 const asyncHandler = require("../utils/asyncHandler");
 const { USER_ROLES } = require("../utils/constants");
 const { env } = require("../config/env");
+const {
+  buildAuthPayload,
+  rotateRefreshToken,
+  revokeRefreshToken
+} = require("../services/tokenService");
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@system.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
-
-const generateToken = (userId) =>
-  jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: env.jwtExpiresIn
-  });
 
 const serializeUser = (user) => ({
   id: user._id,
   name: user.name,
   email: user.email,
-  role: user.role
+  role: user.role,
+  isBlocked: Boolean(user.isBlocked),
+  blockReason: user.blockReason || ""
 });
+
+const issueAuthResponse = async ({ user, req, res, statusCode = 200 }) => {
+  const tokens = await buildAuthPayload({
+    user,
+    ipAddress: req.ip,
+    userAgent: req.get("user-agent") || ""
+  });
+
+  return res.status(statusCode).json({
+    user: serializeUser(user),
+    token: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    refreshTokenExpiresAt: tokens.refreshTokenExpiresAt
+  });
+};
 
 const ensureAdminUser = async () => {
   if (env.isProduction && (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)) {
@@ -50,10 +67,10 @@ const register = asyncHandler(async (req, res) => {
   }
 
   const user = await User.create({ name, email, password, role });
-  return res.status(201).json({
-    user: serializeUser(user),
-    token: generateToken(user._id)
-  });
+  if (user.isBlocked) {
+    return res.status(403).json({ message: "This account is blocked" });
+  }
+  return issueAuthResponse({ user, req, res, statusCode: 201 });
 });
 
 const inviteRegister = asyncHandler(async (req, res) => {
@@ -83,10 +100,7 @@ const inviteRegister = asyncHandler(async (req, res) => {
   invite.usedBy = user._id;
   await invite.save();
 
-  return res.status(201).json({
-    user: serializeUser(user),
-    token: generateToken(user._id)
-  });
+  return issueAuthResponse({ user, req, res, statusCode: 201 });
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -96,15 +110,15 @@ const login = asyncHandler(async (req, res) => {
   if (!user || !(await user.comparePassword(password))) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
+  if (user.isBlocked) {
+    return res.status(403).json({ message: "This account has been blocked by an administrator" });
+  }
 
   if (![USER_ROLES.SELLER, USER_ROLES.BUYER].includes(user.role)) {
     return res.status(403).json({ message: "Use admin login for this account" });
   }
 
-  return res.status(200).json({
-    user: serializeUser(user),
-    token: generateToken(user._id)
-  });
+  return issueAuthResponse({ user, req, res });
 });
 
 const adminLogin = asyncHandler(async (req, res) => {
@@ -113,28 +127,60 @@ const adminLogin = asyncHandler(async (req, res) => {
   if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
     const adminUser = await ensureAdminUser();
 
-    return res.status(200).json({
-      user: serializeUser(adminUser),
-      token: generateToken(adminUser._id)
-    });
+    return issueAuthResponse({ user: adminUser, req, res });
   }
 
   const user = await User.findOne({ email }).select("+password");
   if (!user || !(await user.comparePassword(password))) {
     return res.status(401).json({ message: "Invalid admin credentials" });
   }
-  if (![USER_ROLES.ADMIN, USER_ROLES.LEGAL_OFFICER, USER_ROLES.REGISTRAR].includes(user.role)) {
+  if (user.isBlocked) {
+    return res.status(403).json({ message: "This account has been blocked by an administrator" });
+  }
+  if (![USER_ROLES.ADMIN, USER_ROLES.REGISTRAR].includes(user.role)) {
     return res.status(403).json({ message: "This account is not allowed in admin panel" });
   }
 
-  return res.status(200).json({
-    user: serializeUser(user),
-    token: generateToken(user._id)
-  });
+  return issueAuthResponse({ user, req, res });
 });
 
 const me = asyncHandler(async (req, res) => {
   res.json({ user: req.user });
+});
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "refreshToken is required" });
+  }
+
+  const rotated = await rotateRefreshToken({
+    refreshToken,
+    ipAddress: req.ip,
+    userAgent: req.get("user-agent") || ""
+  });
+
+  if (!rotated) {
+    return res.status(401).json({ message: "Invalid or expired refresh token" });
+  }
+
+  res.json({
+    user: serializeUser(rotated.user),
+    token: rotated.accessToken,
+    refreshToken: rotated.refreshToken,
+    refreshTokenExpiresAt: rotated.refreshTokenExpiresAt
+  });
+});
+
+const logout = asyncHandler(async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (refreshToken) {
+    await revokeRefreshToken(refreshToken);
+  }
+
+  res.json({ message: "Logged out successfully" });
 });
 
 const generateInviteCode = asyncHandler(async (req, res) => {
@@ -168,8 +214,48 @@ const listInviteCodes = asyncHandler(async (req, res) => {
 });
 
 const listUsers = asyncHandler(async (req, res) => {
-  const users = await User.find().select("-password").sort({ createdAt: -1 });
+  const users = await User.find()
+    .select("-password")
+    .populate("blockedBy", "name email role")
+    .sort({ createdAt: -1 });
   res.json({ users });
+});
+
+const blockUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  if (user.role === USER_ROLES.ADMIN) {
+    return res.status(400).json({ message: "Admin account cannot be blocked" });
+  }
+
+  user.isBlocked = true;
+  user.blockedAt = new Date();
+  user.blockedBy = req.user._id;
+  user.blockReason = req.body.reason?.trim() || "Blocked by administrator";
+  await user.save();
+
+  const userData = user.toObject();
+  delete userData.password;
+  res.json({ message: "User blocked successfully", user: userData });
+});
+
+const unblockUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  user.isBlocked = false;
+  user.blockedAt = null;
+  user.blockedBy = null;
+  user.blockReason = "";
+  await user.save();
+
+  const userData = user.toObject();
+  delete userData.password;
+  res.json({ message: "User unblocked successfully", user: userData });
 });
 
 module.exports = {
@@ -178,7 +264,11 @@ module.exports = {
   login,
   adminLogin,
   me,
+  refreshAccessToken,
+  logout,
   generateInviteCode,
   listInviteCodes,
-  listUsers
+  listUsers,
+  blockUser,
+  unblockUser
 };

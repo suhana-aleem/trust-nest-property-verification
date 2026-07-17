@@ -1,11 +1,20 @@
 function WorkflowSummary({ document, blockchainState }) {
   const approvals = document?.approvals || {};
+  const verdictLabelByStatus = {
+    "VERIFIED GENUINE": "Certified Genuine",
+    SUSPICIOUS: "Suspicious",
+    "HIGH RISK / FAKE": "High Risk / Fake"
+  };
+  const verdictLabel = verdictLabelByStatus[document?.aiAnalysis?.genuineVerdict] || "Not verified yet";
 
   const steps = [
-    { label: "Seller Approval", done: approvals.sellerApproved },
-    { label: "Buyer Approval", done: approvals.buyerApproved },
-    { label: "Legal Approval", done: approvals.legalApproved },
+    { label: "Document Uploaded", done: Boolean(document?._id) },
+    { label: "Review / Moderation", done: approvals.legalApproved },
     { label: "AI Verified", done: document?.status !== "Uploaded" && Boolean(document?.aiAnalysis?.analyzedAt) },
+    {
+      label: "Admin Decision",
+      done: ["Admin Approved", "Admin Rejected", "Corrections Requested", "Blockchain Registered", "Locked"].includes(document?.status)
+    },
     { label: "Registrar Approval", done: approvals.registrarApproved },
     {
       label: "Blockchain Registered",
@@ -39,6 +48,10 @@ function WorkflowSummary({ document, blockchainState }) {
           <strong>{document?.status || "Unknown"}</strong>
         </article>
         <article className="summary-card">
+          <span>AI Verdict</span>
+          <strong>{verdictLabel}</strong>
+        </article>
+        <article className="summary-card">
           <span>Certificate</span>
           <strong>{document?.certificateNumber || "Pending"}</strong>
         </article>
@@ -51,6 +64,14 @@ function WorkflowSummary({ document, blockchainState }) {
           <strong>
             {document?.aiAnalysis?.forgeryProbability ?? document?.aiAnalysis?.forgeryProbability === 0
               ? document.aiAnalysis.forgeryProbability
+              : "N/A"}
+          </strong>
+        </article>
+        <article className="summary-card">
+          <span>Original Match Score</span>
+          <strong>
+            {document?.referenceCheck?.textMatchScore ?? document?.referenceCheck?.textMatchScore === 0
+              ? document.referenceCheck.textMatchScore
               : "N/A"}
           </strong>
         </article>

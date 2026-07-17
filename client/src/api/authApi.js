@@ -25,8 +25,28 @@ export const getMeApi = async () => {
   return data;
 };
 
+export const refreshTokenApi = async (payload) => {
+  const { data } = await api.post("/auth/refresh", payload);
+  return data;
+};
+
+export const logoutApi = async (payload) => {
+  const { data } = await api.post("/auth/logout", payload);
+  return data;
+};
+
 export const getAdminUsersApi = async () => {
   const { data } = await api.get("/auth/admin/users");
+  return data;
+};
+
+export const blockUserApi = async (id, payload = {}) => {
+  const { data } = await api.patch(`/auth/admin/users/${id}/block`, payload);
+  return data;
+};
+
+export const unblockUserApi = async (id) => {
+  const { data } = await api.patch(`/auth/admin/users/${id}/unblock`);
   return data;
 };
 

@@ -26,6 +26,7 @@ my project/
 - AI: Python Flask + TensorFlow/Keras + OpenCV + Tesseract
 - Blockchain: Solidity + Hardhat + Sepolia
 - Security: JWT + RBAC + bcrypt + input/file validation
+- Authentication: short-lived access tokens + rotating refresh tokens
 - Ops hardening: rate limiting, environment validation, readiness checks, graceful shutdown, Dockerized services
 
 ## 3. Core Implemented Features
@@ -33,14 +34,17 @@ my project/
 - User authentication and authorization
   - Register/Login
   - JWT token auth
-  - Roles: `Admin`, `LegalOfficer`, `Buyer`, `Seller`, `Registrar`
+  - Roles: `Admin`, `Buyer`, `Seller`, `Registrar`
 - Document management
+  - Registrar/Admin upload authoritative originals
+  - Buyer/Seller upload copies linked to originals
   - Upload PDF/JPG/PNG
-  - Status lifecycle: `Uploaded` -> `AI Verified` -> `Blockchain Registered` -> `Locked`
+  - Status lifecycle: `Uploaded` -> `AI Verified` -> `Admin Approved` / `Corrections Requested` / `Admin Rejected` -> `Blockchain Registered` -> `Locked`
 - AI verification
   - Signature score + forgery probability
   - OCR text extraction
   - Copy-move tamper region detection
+  - Dedicated verification reports with confidence score, risk label, and original-vs-copy comparison summary
 - Blockchain verification
   - SHA-256 hash generation
   - Store hash on Sepolia
@@ -69,6 +73,7 @@ NODE_ENV=development
 MONGODB_URI=<mongodb_atlas_uri>
 JWT_SECRET=<strong_secret>
 JWT_EXPIRES_IN=1d
+REFRESH_TOKEN_TTL_MS=604800000
 CLIENT_URL=http://localhost:3000,http://localhost:4173
 ADMIN_EMAIL=admin@system.com
 ADMIN_PASSWORD=<strong_admin_password>
@@ -168,6 +173,7 @@ Compared to the earlier academic-only version, the project now includes:
 
 - startup-time environment validation for safer deployment
 - auth-specific and global API throttling
+- rotating refresh-token authentication
 - request ID tracing in logs and API errors
 - health and readiness endpoints:
   - `GET /api/health`
@@ -239,28 +245,37 @@ MinIO console:
 
 ## 10. Demo Flow (For Viva)
 
-1. Register/Login users (`Seller`, `Admin`, `LegalOfficer`)
-2. Seller uploads a property document
-3. Admin/LegalOfficer runs AI verification
-4. Admin/LegalOfficer registers document hash on blockchain
-5. Verify hash exists on-chain
-6. Lock document
-7. Open collaborative editor and show lock behavior
+1. Admin logs in and generates a Registrar invite if needed
+2. Registrar uploads an original reference document
+3. Seller or Buyer uploads a document copy linked to that original
+4. Seller or Buyer runs verification and reviews the authenticity report
+5. Admin approves, rejects, or requests corrections
+6. Registrar reviews the approved case, edits the official agreement if needed, and marks review complete
+7. Registrar registers the final document hash on blockchain
+8. Verify hash exists on-chain
+9. Lock document and issue certificate
 
 ## 11. Main API Endpoints
 
 - Auth:
   - `POST /api/auth/register`
   - `POST /api/auth/login`
+  - `POST /api/auth/refresh`
+  - `POST /api/auth/logout`
   - `GET /api/auth/me`
 - Documents:
   - `POST /api/documents/upload`
+  - `GET /api/documents/originals`
+  - `GET /api/documents/:id/file`
   - `POST /api/documents/:id/analyze-ai`
   - `POST /api/documents/:id/register-blockchain`
   - `GET /api/documents/:id/verify-blockchain`
   - `POST /api/documents/:id/lock`
   - `GET /api/documents/:id`
   - `GET /api/documents/:id/versions`
+  - `POST /api/verify-document`
+  - `GET /api/verification-report/:id`
+  - `GET /api/verification-report/document/:id/latest`
 - Audit:
   - `GET /api/audit-logs`
 
@@ -274,13 +289,14 @@ MinIO console:
 ## 13. Resume-Ready Highlights
 
 - Built a multi-service full-stack platform with React, Node.js, Flask AI, MongoDB Atlas, and Ethereum smart contracts
-- Implemented role-based approval workflows across Buyer, Seller, Legal Officer, Admin, and Registrar personas
+- Implemented role-based approval workflows across Buyer, Seller, Admin, and Registrar personas
 - Integrated OCR, tamper analysis, and blockchain verification into a document authenticity pipeline
 - Added production-oriented backend features including rate limiting, readiness probes, request tracing, and environment validation
 - Refactored uploads behind a pluggable storage abstraction to prepare for cloud object storage
 - Added an S3-compatible adapter that can run against free local MinIO for development
 - Containerized the system for repeatable local and prototype deployment
 - Added GitHub Actions CI for backend tests, frontend builds, and AI module syntax verification
+- Added rotating refresh-token authentication and logout/session revocation
 
 ## 14. Future Scope
 

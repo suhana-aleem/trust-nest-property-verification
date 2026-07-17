@@ -21,7 +21,7 @@ const createStaffUser = async ({
   name,
   email,
   password = "Password1",
-  role = USER_ROLES.LEGAL_OFFICER
+  role = USER_ROLES.REGISTRAR
 }) => {
   const user = await User.create({
     name,

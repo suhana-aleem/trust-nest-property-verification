@@ -6,7 +6,7 @@ const inviteCodeSchema = new mongoose.Schema(
     code: { type: String, required: true, unique: true, index: true },
     role: {
       type: String,
-      enum: [USER_ROLES.LEGAL_OFFICER, USER_ROLES.REGISTRAR],
+      enum: [USER_ROLES.REGISTRAR],
       required: true
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

@@ -5,15 +5,30 @@ export const getDocumentsApi = async () => {
   return data;
 };
 
+export const getOriginalDocumentsApi = async () => {
+  const { data } = await api.get("/documents/originals");
+  return data;
+};
+
 export const getDocumentApi = async (id) => {
   const { data } = await api.get(`/documents/${id}`);
+  return data;
+};
+
+export const getDocumentPreviewBlobApi = async (id) => {
+  const { data } = await api.get(`/documents/${id}/file`, {
+    responseType: "blob"
+  });
   return data;
 };
 
 export const uploadDocumentApi = async (payload) => {
   const form = new FormData();
   form.append("title", payload.title);
+  form.append("propertyTitle", payload.propertyTitle);
   form.append("propertyId", payload.propertyId);
+  if (payload.documentType) form.append("documentType", payload.documentType);
+  if (payload.sourceDocumentId) form.append("sourceDocumentId", payload.sourceDocumentId);
   form.append("document", payload.file);
 
   const { data } = await api.post("/documents/upload", form, {
@@ -24,6 +39,21 @@ export const uploadDocumentApi = async (payload) => {
 
 export const analyzeDocumentApi = async (id) => {
   const { data } = await api.post(`/documents/${id}/analyze-ai`);
+  return data;
+};
+
+export const verifyDocumentApi = async (documentId) => {
+  const { data } = await api.post("/verify-document", { documentId });
+  return data;
+};
+
+export const getVerificationReportApi = async (reportId) => {
+  const { data } = await api.get(`/verification-report/${reportId}`);
+  return data;
+};
+
+export const getLatestVerificationReportForDocumentApi = async (documentId) => {
+  const { data } = await api.get(`/verification-report/document/${documentId}/latest`);
   return data;
 };
 
@@ -89,6 +119,19 @@ export const approveRegistrarApi = async (id) => {
 
 export const issueCertificateApi = async (id) => {
   const { data } = await api.post(`/documents/${id}/issue-certificate`);
+  return data;
+};
+
+export const getCertificateApi = async (id, { download = false } = {}) => {
+  const { data } = await api.get(`/documents/${id}/certificate`, {
+    responseType: "blob",
+    params: download ? { download: 1 } : undefined
+  });
+  return data;
+};
+
+export const deleteDocumentApi = async (id) => {
+  const { data } = await api.delete(`/documents/${id}`);
   return data;
 };
 

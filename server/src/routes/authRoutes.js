@@ -5,9 +5,13 @@ const {
   login,
   adminLogin,
   me,
+  refreshAccessToken,
+  logout,
   generateInviteCode,
   listInviteCodes,
-  listUsers
+  listUsers,
+  blockUser,
+  unblockUser
 } = require("../controllers/authController");
 const { protect } = require("../middlewares/auth");
 const { authorize } = require("../middlewares/rbac");
@@ -16,8 +20,10 @@ const { buildRateLimiter } = require("../middlewares/rateLimit");
 const {
   registerValidation,
   loginValidation,
+  refreshTokenValidation,
   adminInviteValidation,
-  inviteRegisterValidation
+  inviteRegisterValidation,
+  blockUserValidation
 } = require("../validators/authValidator");
 const { USER_ROLES } = require("../utils/constants");
 const { env } = require("../config/env");
@@ -32,6 +38,8 @@ const authLimiter = buildRateLimiter({
 router.post("/register", authLimiter, registerValidation, validateRequest, register);
 router.post("/login", authLimiter, loginValidation, validateRequest, login);
 router.post("/admin/login", authLimiter, loginValidation, validateRequest, adminLogin);
+router.post("/refresh", authLimiter, refreshTokenValidation, validateRequest, refreshAccessToken);
+router.post("/logout", logout);
 router.post(
   "/admin/invite-register",
   authLimiter,
@@ -45,6 +53,20 @@ router.get(
   protect,
   authorize(USER_ROLES.ADMIN),
   listUsers
+);
+router.patch(
+  "/admin/users/:id/block",
+  protect,
+  authorize(USER_ROLES.ADMIN),
+  blockUserValidation,
+  validateRequest,
+  blockUser
+);
+router.patch(
+  "/admin/users/:id/unblock",
+  protect,
+  authorize(USER_ROLES.ADMIN),
+  unblockUser
 );
 router.get(
   "/admin/invites",

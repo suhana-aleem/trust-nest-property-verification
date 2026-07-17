@@ -12,6 +12,7 @@ const { buildRateLimiter } = require("./middlewares/rateLimit");
 const authRoutes = require("./routes/authRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const auditRoutes = require("./routes/auditRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
 const { errorHandler } = require("./middlewares/errorHandler");
 
 const app = express();
@@ -73,6 +74,7 @@ app.get("/api/ready", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/audit-logs", auditRoutes);
+app.use("/api", verificationRoutes);
 
 app.use(errorHandler);
 

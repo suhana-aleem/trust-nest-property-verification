@@ -44,11 +44,6 @@ describe("Document workflow API", () => {
       role: USER_ROLES.BUYER
     });
     await createStaffUser({
-      name: "Legal One",
-      email: "legal@example.com",
-      role: USER_ROLES.LEGAL_OFFICER
-    });
-    await createStaffUser({
       name: "Registrar One",
       email: "registrar@example.com",
       role: USER_ROLES.REGISTRAR
@@ -56,10 +51,6 @@ describe("Document workflow API", () => {
 
     const sellerLogin = await loginUser({ email: "seller@example.com" });
     const buyerLogin = await loginUser({ email: "buyer@example.com" });
-    const legalLogin = await loginUser({
-      email: "legal@example.com",
-      admin: true
-    });
     const registrarLogin = await loginUser({
       email: "registrar@example.com",
       admin: true
@@ -69,10 +60,25 @@ describe("Document workflow API", () => {
       password: process.env.ADMIN_PASSWORD
     });
 
+    const originalUpload = await request(app)
+      .post("/api/documents/upload")
+      .set("Authorization", `Bearer ${registrarLogin.body.token}`)
+      .field("title", "Plot Sale Deed Original")
+      .field("documentType", "Original")
+      .attach("document", pdfFixture(), {
+        filename: "sale-deed-original.pdf",
+        contentType: "application/pdf"
+      });
+
+    expect(originalUpload.statusCode).toBe(201);
+    expect(originalUpload.body.document.documentType).toBe("Original");
+
     const upload = await request(app)
       .post("/api/documents/upload")
       .set("Authorization", `Bearer ${sellerLogin.body.token}`)
       .field("title", "Plot Sale Deed")
+      .field("sourceDocumentId", originalUpload.body.document._id)
+      .field("documentType", "SubmittedCopy")
       .attach("document", pdfFixture(), {
         filename: "sale-deed.pdf",
         contentType: "application/pdf"
@@ -81,6 +87,7 @@ describe("Document workflow API", () => {
     expect(upload.statusCode).toBe(201);
     expect(upload.body.document.propertyId).toMatch(/^PROP-\d{8}-\d{4}$/);
     expect(upload.body.document.status).toBe(DOCUMENT_STATUS.UPLOADED);
+    expect(upload.body.document.documentType).toBe("SubmittedCopy");
 
     const documentId = upload.body.document._id;
 
@@ -100,18 +107,12 @@ describe("Document workflow API", () => {
 
     const suggestionId = buyerSuggestion.body.suggestion._id;
 
-    const legalReview = await request(app)
+    const registrarReview = await request(app)
       .post(`/api/documents/${documentId}/suggestions/${suggestionId}/review`)
-      .set("Authorization", `Bearer ${legalLogin.body.token}`)
+      .set("Authorization", `Bearer ${registrarLogin.body.token}`)
       .send({ status: "Accepted", reviewNote: "Valid change request" });
 
-    expect(legalReview.statusCode).toBe(200);
-
-    const legalApproveTooEarly = await request(app)
-      .post(`/api/documents/${documentId}/approve/legal`)
-      .set("Authorization", `Bearer ${legalLogin.body.token}`);
-
-    expect(legalApproveTooEarly.statusCode).toBe(400);
+    expect(registrarReview.statusCode).toBe(200);
 
     const sellerApprove = await request(app)
       .post(`/api/documents/${documentId}/approve/seller`)
@@ -120,14 +121,31 @@ describe("Document workflow API", () => {
       .post(`/api/documents/${documentId}/approve/buyer`)
       .set("Authorization", `Bearer ${buyerLogin.body.token}`);
 
-    expect(sellerApprove.statusCode).toBe(200);
-    expect(buyerApprove.statusCode).toBe(200);
+    expect(sellerApprove.statusCode).toBe(400);
+    expect(sellerApprove.body.message).toMatch(/not required/i);
+    expect(buyerApprove.statusCode).toBe(400);
+    expect(buyerApprove.body.message).toMatch(/not required/i);
 
-    const legalApprove = await request(app)
+    const verificationReport = await request(app)
+      .post("/api/verify-document")
+      .set("Authorization", `Bearer ${sellerLogin.body.token}`)
+      .send({ documentId });
+
+    expect(verificationReport.statusCode).toBe(201);
+    expect(verificationReport.body.verificationReport.status).toBe("VERIFIED GENUINE");
+
+    const latestVerificationReport = await request(app)
+      .get(`/api/verification-report/document/${documentId}/latest`)
+      .set("Authorization", `Bearer ${sellerLogin.body.token}`);
+
+    expect(latestVerificationReport.statusCode).toBe(200);
+    expect(latestVerificationReport.body.verificationReport.documentId.toString()).toBe(documentId);
+
+    const reviewComplete = await request(app)
       .post(`/api/documents/${documentId}/approve/legal`)
-      .set("Authorization", `Bearer ${legalLogin.body.token}`);
+      .set("Authorization", `Bearer ${registrarLogin.body.token}`);
 
-    expect(legalApprove.statusCode).toBe(200);
+    expect(reviewComplete.statusCode).toBe(200);
 
     const aiVerify = await request(app)
       .post(`/api/documents/${documentId}/analyze-ai`)
@@ -135,6 +153,7 @@ describe("Document workflow API", () => {
 
     expect(aiVerify.statusCode).toBe(200);
     expect(aiVerify.body.result.forgeryProbability).toBe(0.19);
+    expect(aiVerify.body.referenceCheck).toBeDefined();
 
     const adminDecision = await request(app)
       .post(`/api/documents/${documentId}/admin-decision`)
@@ -163,11 +182,11 @@ describe("Document workflow API", () => {
     expect(blockchainRegister.statusCode).toBe(200);
     expect(blockchainRegister.body.blockchainRecord.transactionHash).toBe("0xtesthash");
 
-    const lockAttemptByLegal = await request(app)
+    const lockAttemptByBuyer = await request(app)
       .post(`/api/documents/${documentId}/lock`)
-      .set("Authorization", `Bearer ${legalLogin.body.token}`);
+      .set("Authorization", `Bearer ${buyerLogin.body.token}`);
 
-    expect(lockAttemptByLegal.statusCode).toBe(403);
+    expect(lockAttemptByBuyer.statusCode).toBe(403);
 
     const lockDocument = await request(app)
       .post(`/api/documents/${documentId}/lock`)

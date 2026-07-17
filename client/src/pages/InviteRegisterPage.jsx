@@ -21,7 +21,7 @@ function InviteRegisterPage() {
     try {
       const result = await inviteRegister(form);
       const role = result?.user?.role;
-      navigate(["Admin", "LegalOfficer", "Registrar"].includes(role) ? "/admin/dashboard" : "/dashboard");
+      navigate(["Admin", "Registrar"].includes(role) ? "/admin/dashboard" : "/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Invite registration failed");
     } finally {
@@ -34,10 +34,10 @@ function InviteRegisterPage() {
       <section className="auth-shell">
         <div className="auth-aside">
           <p className="eyebrow">Invite-only registration</p>
-          <h1>Legal and registrar access is issued only by admin-generated invite code.</h1>
+          <h1>Registrar access is issued only by admin-generated invite code.</h1>
           <p className="auth-copy">
-            Use the invite exactly as issued. The system assigns the role from the code and blocks
-            public signup for these back-office accounts.
+            Use the invite exactly as issued. The system assigns the Registrar role from the code
+            and blocks public signup for this back-office account.
           </p>
         </div>
         <form className="card auth-card" onSubmit={submit}>

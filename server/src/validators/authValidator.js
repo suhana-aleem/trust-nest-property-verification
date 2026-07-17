@@ -19,10 +19,14 @@ const loginValidation = [
   body("password").notEmpty().withMessage("Password is required")
 ];
 
+const refreshTokenValidation = [
+  body("refreshToken").notEmpty().withMessage("refreshToken is required")
+];
+
 const adminInviteValidation = [
   body("role")
-    .isIn([USER_ROLES.LEGAL_OFFICER, USER_ROLES.REGISTRAR])
-    .withMessage("Invite role must be LegalOfficer or Registrar")
+    .isIn([USER_ROLES.REGISTRAR])
+    .withMessage("Invite role must be Registrar")
 ];
 
 const inviteRegisterValidation = [
@@ -36,9 +40,15 @@ const inviteRegisterValidation = [
   body("inviteCode").trim().notEmpty().withMessage("Invite code is required")
 ];
 
+const blockUserValidation = [
+  body("reason").optional().trim().isLength({ min: 3 }).withMessage("Block reason must be at least 3 characters")
+];
+
 module.exports = {
   registerValidation,
   loginValidation,
+  refreshTokenValidation,
   adminInviteValidation,
-  inviteRegisterValidation
+  inviteRegisterValidation,
+  blockUserValidation
 };

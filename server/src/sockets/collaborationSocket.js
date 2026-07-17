@@ -16,6 +16,9 @@ const canAccessDocument = (document, userId) => {
   return document.participants.some((participant) => participant.toString() === userId.toString());
 };
 
+const hasBackofficeAccess = (role) =>
+  [USER_ROLES.ADMIN, USER_ROLES.REGISTRAR].includes(role);
+
 const applyOperation = (content, operation) => {
   const text = String(content || "");
   const position = Math.max(0, Math.min(operation.position || 0, text.length));
@@ -63,6 +66,7 @@ const initCollaborationSocket = (io) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id).select("-password");
       if (!user) return next(new Error("Unauthorized"));
+      if (user.isBlocked) return next(new Error("Forbidden"));
       socket.user = user;
       return next();
     } catch (error) {
@@ -77,7 +81,7 @@ const initCollaborationSocket = (io) => {
         socket.emit("error-event", { message: "Document not found" });
         return;
       }
-      if (!canAccessDocument(document, socket.user._id)) {
+      if (!canAccessDocument(document, socket.user._id) && !hasBackofficeAccess(socket.user.role)) {
         socket.emit("error-event", { message: "Access denied for this document" });
         return;
       }
@@ -111,10 +115,10 @@ const initCollaborationSocket = (io) => {
       const session = sessions.get(documentId);
       const document = await Document.findById(documentId);
       if (!document || document.isLocked) return;
-      if (!canAccessDocument(document, socket.user._id)) return;
-      if (![USER_ROLES.LEGAL_OFFICER, USER_ROLES.ADMIN].includes(socket.user.role)) {
+      if (!canAccessDocument(document, socket.user._id) && !hasBackofficeAccess(socket.user.role)) return;
+      if (![USER_ROLES.REGISTRAR, USER_ROLES.ADMIN].includes(socket.user.role)) {
         socket.emit("error-event", {
-          message: "Only Legal Officer can edit official document content. Use suggestions instead."
+          message: "Only Registrar or Admin can edit official document content. Use suggestions instead."
         });
         return;
       }

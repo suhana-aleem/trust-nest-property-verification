@@ -14,8 +14,8 @@ function SuggestionBoard({
   const [loading, setLoading] = useState(false);
 
   const canSuggest = ["Seller", "Buyer"].includes(user?.role);
-  const canReview = ["LegalOfficer", "Admin"].includes(user?.role);
-  const canComment = ["Seller", "Buyer", "LegalOfficer", "Admin"].includes(user?.role);
+  const canReview = ["Registrar", "Admin"].includes(user?.role);
+  const canComment = ["Seller", "Buyer", "Registrar", "Admin"].includes(user?.role);
 
   const submitSuggestion = async (e) => {
     e.preventDefault();
@@ -95,7 +95,7 @@ function SuggestionBoard({
               <p className="suggestion-text">{suggestion.suggestionText}</p>
 
               {suggestion.reviewNote ? (
-                <p className="review-note">Legal note: {suggestion.reviewNote}</p>
+                <p className="review-note">Review note: {suggestion.reviewNote}</p>
               ) : null}
 
               {canReview && suggestion.status === "Pending" ? (

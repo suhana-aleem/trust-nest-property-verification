@@ -2,7 +2,9 @@ const express = require("express");
 const {
   uploadDocument,
   getDocuments,
+  getOriginalDocuments,
   getDocumentById,
+  streamDocumentFile,
   getDocumentVersions,
   addParticipant,
   createSuggestion,
@@ -18,7 +20,9 @@ const {
   registerOnBlockchain,
   verifyDocumentHash,
   lockDocument,
-  issueCertificate
+  issueCertificate,
+  getCertificate,
+  deleteDocument
 } = require("../controllers/documentController");
 const { protect } = require("../middlewares/auth");
 const { authorize } = require("../middlewares/rbac");
@@ -38,6 +42,8 @@ const router = express.Router();
 router.use(protect);
 
 router.get("/", getDocuments);
+router.get("/originals", getOriginalDocuments);
+router.get("/:id/file", streamDocumentFile);
 router.get("/:id", getDocumentById);
 router.get("/:id/versions", getDocumentVersions);
 router.post("/:id/participants", addParticipantValidation, validateRequest, addParticipant);
@@ -51,14 +57,14 @@ router.post(
 );
 router.post(
   "/:id/suggestions/:suggestionId/review",
-  authorize(USER_ROLES.LEGAL_OFFICER, USER_ROLES.ADMIN),
+  authorize(USER_ROLES.REGISTRAR, USER_ROLES.ADMIN),
   reviewSuggestionValidation,
   validateRequest,
   reviewSuggestion
 );
 router.post(
   "/:id/suggestions/:suggestionId/comment",
-  authorize(USER_ROLES.SELLER, USER_ROLES.BUYER, USER_ROLES.LEGAL_OFFICER, USER_ROLES.ADMIN),
+  authorize(USER_ROLES.SELLER, USER_ROLES.BUYER, USER_ROLES.REGISTRAR, USER_ROLES.ADMIN),
   suggestionCommentValidation,
   validateRequest,
   commentOnSuggestion
@@ -67,7 +73,7 @@ router.post("/:id/approve/seller", authorize(USER_ROLES.SELLER), approveAsSeller
 router.post("/:id/approve/buyer", authorize(USER_ROLES.BUYER), approveAsBuyer);
 router.post(
   "/:id/approve/legal",
-  authorize(USER_ROLES.LEGAL_OFFICER, USER_ROLES.ADMIN),
+  authorize(USER_ROLES.REGISTRAR, USER_ROLES.ADMIN),
   approveAsLegal
 );
 router.post(
@@ -83,7 +89,7 @@ router.post(
 
 router.post(
   "/upload",
-  authorize(USER_ROLES.SELLER, USER_ROLES.BUYER),
+  authorize(USER_ROLES.SELLER, USER_ROLES.BUYER, USER_ROLES.REGISTRAR, USER_ROLES.ADMIN),
   upload.single("document"),
   createDocumentValidation,
   validateRequest,
@@ -92,7 +98,7 @@ router.post(
 
 router.post(
   "/:id/analyze-ai",
-  authorize(USER_ROLES.LEGAL_OFFICER, USER_ROLES.ADMIN, USER_ROLES.SELLER, USER_ROLES.BUYER),
+  authorize(USER_ROLES.REGISTRAR, USER_ROLES.ADMIN, USER_ROLES.SELLER, USER_ROLES.BUYER),
   analyzeDocument
 );
 
@@ -113,6 +119,12 @@ router.post(
   "/:id/issue-certificate",
   authorize(USER_ROLES.REGISTRAR, USER_ROLES.ADMIN),
   issueCertificate
+);
+router.get("/:id/certificate", getCertificate);
+router.delete(
+  "/:id",
+  authorize(USER_ROLES.SELLER, USER_ROLES.BUYER, USER_ROLES.REGISTRAR, USER_ROLES.ADMIN),
+  deleteDocument
 );
 
 module.exports = router;

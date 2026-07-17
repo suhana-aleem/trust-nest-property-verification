@@ -3,8 +3,8 @@ const asyncHandler = require("../utils/asyncHandler");
 const { USER_ROLES } = require("../utils/constants");
 
 const getAuditLogs = asyncHandler(async (req, res) => {
-  if (![USER_ROLES.ADMIN, USER_ROLES.LEGAL_OFFICER].includes(req.user.role)) {
-    return res.status(403).json({ message: "Only Admin or Legal Officer can view audit logs" });
+  if (![USER_ROLES.ADMIN, USER_ROLES.REGISTRAR].includes(req.user.role)) {
+    return res.status(403).json({ message: "Only Admin or Registrar can view audit logs" });
   }
 
   const { resourceType, resourceId } = req.query;

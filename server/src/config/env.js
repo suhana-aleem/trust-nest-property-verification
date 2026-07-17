@@ -34,6 +34,7 @@ const env = {
   port: Number(process.env.PORT || 5000),
   clientOrigins: parseOrigins(process.env.CLIENT_URL || "http://localhost:3000"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1d",
+  refreshTokenTtlMs: Number(process.env.REFRESH_TOKEN_TTL_MS || 7 * 24 * 60 * 60 * 1000),
   authWindowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
   authMaxRequests: Number(process.env.AUTH_RATE_LIMIT_MAX || 10),
   apiWindowMs: Number(process.env.API_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),

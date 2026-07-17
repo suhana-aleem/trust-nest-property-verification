@@ -13,10 +13,25 @@ const createDocumentValidation = [
     .isLength({ min: 3 })
     .withMessage("Title must be at least 3 characters")
     .customSanitizer(sanitizeText),
+  body("propertyTitle")
+    .trim()
+    .isLength({ min: 3 })
+    .withMessage("Property title must be at least 3 characters")
+    .customSanitizer(sanitizeText),
+  body("documentType")
+    .optional({ values: "falsy" })
+    .isIn(["Original", "SubmittedCopy"])
+    .withMessage("documentType must be Original or SubmittedCopy"),
   body("propertyId")
+    .trim()
+    .notEmpty()
+    .withMessage("Property ID is required")
+    .customSanitizer(sanitizeText),
+  body("sourceDocumentId")
     .optional({ values: "falsy" })
     .trim()
-    .customSanitizer(sanitizeText)
+    .isMongoId()
+    .withMessage("sourceDocumentId must be a valid document id")
 ];
 
 const addParticipantValidation = [

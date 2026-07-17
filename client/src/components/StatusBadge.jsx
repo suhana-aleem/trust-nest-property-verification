@@ -1,6 +1,9 @@
 const toneByStatus = {
   Uploaded: "badge-gray",
   "AI Verified": "badge-blue",
+  "Admin Approved": "badge-green",
+  "Admin Rejected": "badge-orange",
+  "Corrections Requested": "badge-orange",
   "Blockchain Registered": "badge-orange",
   Locked: "badge-green"
 };

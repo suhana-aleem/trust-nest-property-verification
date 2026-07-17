@@ -31,13 +31,13 @@ function AdminLoginPage() {
           <p className="eyebrow">TRUST NEST Control Room</p>
           <h1>Private access for final review, invite control, and document authority.</h1>
           <p className="auth-copy">
-            Admin credentials are fixed. Legal Officer and Registrar accounts must be created
-            through invite-only registration.
+            Admin credentials are fixed. Registrar accounts must be created through invite-only
+            registration.
           </p>
           <div className="auth-points">
             <span>Admin final authenticity</span>
             <span>Invite-only onboarding</span>
-            <span>Registrar blockchain lock</span>
+            <span>Registrar agreement finalization</span>
           </div>
         </div>
         <form className="card auth-card" onSubmit={submit}>

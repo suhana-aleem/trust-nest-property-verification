@@ -1,13 +1,48 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { adminLoginApi, getMeApi, inviteRegisterApi, loginApi, registerApi } from "../api/authApi";
-import { setAuthHeader } from "../api/client";
+import {
+  adminLoginApi,
+  getMeApi,
+  inviteRegisterApi,
+  loginApi,
+  logoutApi,
+  registerApi
+} from "../api/authApi";
+import { configureAuthClient, setAuthHeader } from "../api/client";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem("refreshToken") || "");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const persistSession = (data) => {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("refreshToken", data.refreshToken);
+    setToken(data.token);
+    setRefreshToken(data.refreshToken);
+    setAuthHeader(data.token);
+    setUser(data.user);
+  };
+
+  const clearSession = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    setAuthHeader(null);
+    setToken("");
+    setRefreshToken("");
+    setUser(null);
+  };
+
+  useEffect(() => {
+    configureAuthClient({
+      getAccessToken: () => localStorage.getItem("token") || "",
+      getRefreshToken: () => localStorage.getItem("refreshToken") || "",
+      saveSession: persistSession,
+      clearSession
+    });
+  }, []);
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -20,9 +55,7 @@ export const AuthProvider = ({ children }) => {
         const data = await getMeApi();
         setUser(data.user);
       } catch {
-        localStorage.removeItem("token");
-        setToken("");
-        setUser(null);
+        clearSession();
       } finally {
         setLoading(false);
       }
@@ -32,50 +65,42 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (payload) => {
     const data = await loginApi(payload);
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-    setAuthHeader(data.token);
-    setUser(data.user);
+    persistSession(data);
     return data;
   };
 
   const adminLogin = async (payload) => {
     const data = await adminLoginApi(payload);
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-    setAuthHeader(data.token);
-    setUser(data.user);
+    persistSession(data);
     return data;
   };
 
   const register = async (payload) => {
     const data = await registerApi(payload);
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-    setAuthHeader(data.token);
-    setUser(data.user);
+    persistSession(data);
     return data;
   };
 
   const inviteRegister = async (payload) => {
     const data = await inviteRegisterApi(payload);
-    localStorage.setItem("token", data.token);
-    setToken(data.token);
-    setAuthHeader(data.token);
-    setUser(data.user);
+    persistSession(data);
     return data;
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setAuthHeader(null);
-    setToken("");
-    setUser(null);
+  const logout = async () => {
+    try {
+      if (refreshToken) {
+        await logoutApi({ refreshToken });
+      }
+    } finally {
+      clearSession();
+    }
   };
 
   const value = useMemo(
     () => ({
       token,
+      refreshToken,
       user,
       loading,
       login,
@@ -85,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       logout,
       isAuthenticated: Boolean(token)
     }),
-    [token, user, loading]
+    [token, refreshToken, user, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
